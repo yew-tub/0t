@@ -4,7 +4,7 @@ export class StateManager {
   constructor(logger) {
     this.logger = logger;
     this.octokit = new Octokit({
-      auth: process.env.GH_TOKEN
+      auth: process.env.GITHUB_TOKEN
     });
     this.gistId = process.env.GIST_ID;
     this.processedPosts = new Set();
@@ -169,3 +169,4 @@ export class StateManager {
       this.logger.error('❌ Failed to save final state:', error);
     }
   }
+}
