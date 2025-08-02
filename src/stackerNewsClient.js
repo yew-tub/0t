@@ -16,6 +16,11 @@ export class StackerNewsClient {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
 
+    // ADD DEBUG LOGS HERE
+    this.logger.debug('GraphQL Query:', query);
+    this.logger.debug('GraphQL Variables:', variables);
+    this.logger.debug('Request Headers:', headers);
+
     const response = await fetch(this.apiUrl, {
       method: 'POST',
       headers,
@@ -25,11 +30,20 @@ export class StackerNewsClient {
       })
     });
 
+    // ADD RESPONSE DEBUG INFO
+    this.logger.debug('Response Status:', response.status, response.statusText);
+    
     if (!response.ok) {
+      // Get response text for better error debugging
+      const responseText = await response.text();
+      this.logger.error('Response Body:', responseText);
       throw new Error(`GraphQL request failed: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
+    
+    // ADD RESPONSE DATA DEBUG
+    this.logger.debug('Response Data:', JSON.stringify(data, null, 2));
     
     if (data.errors) {
       throw new Error(`GraphQL errors: ${JSON.stringify(data.errors)}`);
