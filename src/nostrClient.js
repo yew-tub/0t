@@ -1,10 +1,9 @@
 import { 
-  generatePrivateKey, 
+  generateSecretKey, 
   getPublicKey, 
-  finishEvent, 
+  finalizeEvent, 
   nip19,
-  SimplePool,
-  getEventHash
+  SimplePool
 } from 'nostr-tools';
 
 export class NostrClient {
@@ -39,6 +38,7 @@ export class NostrClient {
         const decoded = nip19.decode(nsec);
         this.privateKey = decoded.data;
       } else {
+        // Assume it's a hex string
         this.privateKey = nsec;
       }
 
@@ -89,7 +89,7 @@ export class NostrClient {
       };
 
       // Sign event
-      const signedEvent = finishEvent(event, this.privateKey);
+      const signedEvent = finalizeEvent(event, this.privateKey);
       
       this.logger.debug(`📤 Publishing event ${signedEvent.id} to ${this.relays.length} relays`);
 
