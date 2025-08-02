@@ -40,8 +40,8 @@ export class StackerNewsClient {
 
   async getRecentPosts(limit = 50) {
     const query = `
-      query RecentPosts($sort: String!, $limit: Int!) {
-        items(sort: $sort, limit: $limit) {
+      query RecentPosts($sort: String!, $when: String!, $limit: Int!) {
+        items(sort: $sort, when: $when, limit: $limit) {
           items {
             id
             title
@@ -66,6 +66,7 @@ export class StackerNewsClient {
       this.logger.debug('🔄 Fetching recent posts from Stacker News API...');
       const data = await this.graphqlRequest(query, {
         sort: 'recent',
+        when: 'day',
         limit
       });
 
@@ -83,6 +84,7 @@ export class StackerNewsClient {
 
     } catch (error) {
       this.logger.error('❌ Failed to fetch recent posts:', error);
+      this.logger.error('Full error details:', error);
       throw error;
     }
   }
