@@ -1,0 +1,41 @@
+name: YewTuBot - YouTube Link Converter
+
+on:
+  schedule:
+    # Run every 21 minutes
+    - cron: '*/21 * * * *'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run YewTuBot
+      env:
+        NOSTR_NSEC: ${{ secrets.NOSTR_NSEC }}
+        NOSTR_NPUB: ${{ secrets.NOSTR_NPUB }}
+        STACKER_NEWS_TOKEN: ${{ secrets.STACKER_NEWS_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GIST_ID: ${{ secrets.GIST_ID }}
+      run: node src/bot.js
+      
+    - name: Upload logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: bot-logs-${{ github.run_number }}
+        path: logs/
+        retention-days: 7
