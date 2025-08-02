@@ -127,21 +127,17 @@ export class StackerNewsClient {
     }
   }
 
-  async getItemDetails(itemId) {
+  async getRecentPostsSimple(limit = 20) {
+    // Simplified query without parameters that might cause issues
     const query = `
-      query GetItem($id: ID!) {
-        item(id: $id) {
-          id
-          title
-          text
-          url
-          createdAt
-          user {
-            name
-          }
-          comments {
+      query {
+        items(sort: "recent") {
+          items {
             id
+            title
             text
+            url
+            createdAt
             user {
               name
             }
@@ -151,11 +147,25 @@ export class StackerNewsClient {
     `;
 
     try {
-      const data = await this.graphqlRequest(query, { id: itemId });
-      return data.item;
+      this.logger.debug('🔄 Fetching posts with simple query...');
+      const data = await this.graphqlRequest(query);
+
+      const posts = data.items?.items || [];
+      this.logger.debug(`📊 Retrieved ${posts.length} posts with simple query`);
+      
+      // Take only the most recent posts and filter by time
+      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+      const recentPosts = posts
+        .filter(post => new Date(post.createdAt) > thirtyMinutesAgo)
+        .slice(0, limit);
+
+      this.logger.info(`🕐 Found ${recentPosts.length} recent posts with fallback method`);
+      return recentPosts;
+
     } catch (error) {
-      this.logger.error(`❌ Failed to get item details for ${itemId}:`, error);
-      return null;
+      this.logger.error('❌ Fallback query also failed:', error);
+      // Return empty array rather than throwing to allow bot to continue
+      return [];
     }
   }
 }
