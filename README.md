@@ -25,7 +25,7 @@ Go to your repository's Settings → Secrets and variables → Actions, and add 
 #### Required Secrets:
 - `NOSTR_NSEC` - Your Nostr private key (nsec1... format)
 - `NOSTR_NPUB` - Your Nostr public key (npub1... format) 
-- `GITHUB_TOKEN` - GitHub personal access token with gist permissions
+- `GH_TOKEN` - GitHub personal access token with gist permissions
 - `GIST_ID` - GitHub Gist ID for storing processed posts (leave empty on first run)
 
 #### Optional Secrets:
@@ -36,7 +36,7 @@ Go to your repository's Settings → Secrets and variables → Actions, and add 
 1. Go to [GitHub Settings → Developer settings → Personal access tokens](https://github.com/settings/tokens)
 2. Generate a new token (classic) with these scopes:
    - `gist` (create, update, and delete gists)
-3. Add the token as `GITHUB_TOKEN` secret
+3. Add the token as `GH_TOKEN` secret
 
 ### 4. Nostr Keys Setup
 
