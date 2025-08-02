@@ -4,7 +4,7 @@ on:
   schedule:
     # Run every 21 minutes
     - cron: '*/21 * * * *'
-  workflow_dispatch: # Allow manual triggering
+  workflow_dispatch: # Allow manual triggering, YES!
 
 jobs:
   run-bot:
