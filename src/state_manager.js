@@ -4,7 +4,7 @@ export class StateManager {
   constructor(logger) {
     this.logger = logger;
     this.octokit = new Octokit({
-      auth: process.env.GITHUB_TOKEN
+      auth: process.env.GH_TOKEN
     });
     this.gistId = process.env.GIST_ID;
     this.processedPosts = new Set();
