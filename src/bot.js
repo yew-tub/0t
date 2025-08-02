@@ -37,21 +37,24 @@ class YewTuBot {
       const recentPosts = await this.stackerClient.getRecentPosts();
       this.logger.info(`📊 Found ${recentPosts.length} recent posts`);
 
-      const processedCount = await this.processedThisRun = 0;
-      const detectedCount = await this.detectedThisRun = 0;
-      const commentedCount = await this.commentedThisRun = 0;
-      const nostrPostCount = await this.nostrPostCount = 0;
+      let processedCount = 0;
+      let detectedCount = 0;
+      let commentedCount = 0;
+      let nostrPostCount = 0;
 
       for (const post of recentPosts) {
-        await this.processPost(post);
-        this.processedCount++;
+        const result = await this.processPost(post);
+        processedCount++;
+        if (result.detected) detectedCount++;
+        if (result.commented) commentedCount++;
+        if (result.nostrPosted) nostrPostCount++;
       }
 
       this.logger.info('📈 Run Summary:');
-      this.logger.info(`  • Posts processed: ${this.processedCount}`);
-      this.logger.info(`  • YouTube links detected: ${this.detectedCount}`);
-      this.logger.info(`  • Comments posted: ${this.commentedCount}`);
-      this.logger.info(`  • Nostr posts created: ${this.nostrPostCount}`);
+      this.logger.info(`  • Posts processed: ${processedCount}`);
+      this.logger.info(`  • YouTube links detected: ${detectedCount}`);
+      this.logger.info(`  • Comments posted: ${commentedCount}`);
+      this.logger.info(`  • Nostr posts created: ${nostrPostCount}`);
       this.logger.info('✅ Bot run completed successfully');
 
     } catch (error) {
@@ -62,11 +65,12 @@ class YewTuBot {
 
   async processPost(post) {
     const postId = post.id;
+    const result = { detected: false, commented: false, nostrPosted: false };
     
     // Check if we've already processed this post
     if (await this.stateManager.hasProcessedPost(postId)) {
       this.logger.debug(`⏭️  Skipping already processed post: ${postId}`);
-      return;
+      return result;
     }
 
     this.logger.info(`🔍 Processing post ${postId} by @${post.user?.name || 'unknown'}`);
@@ -77,10 +81,10 @@ class YewTuBot {
     if (youtubeLinks.length === 0) {
       this.logger.debug(`  No YouTube links found in post ${postId}`);
       await this.stateManager.markPostAsProcessed(postId);
-      return;
+      return result;
     }
 
-    this.detectedCount++;
+    result.detected = true;
     this.logger.info(`🎥 Found ${youtubeLinks.length} YouTube link(s) in post ${postId}`);
     
     try {
@@ -89,13 +93,13 @@ class YewTuBot {
       const commentSuccess = await this.stackerClient.postComment(postId, comment);
       
       if (commentSuccess) {
-        this.commentedCount++;
+        result.commented = true;
         this.logger.info(`💬 Posted comment on post ${postId}`);
         
         // Post to Nostr
         const nostrSuccess = await this.postToNostr(post, youtubeLinks);
         if (nostrSuccess) {
-          this.nostrPostCount++;
+          result.nostrPosted = true;
           this.logger.info(`📡 Posted to Nostr for post ${postId}`);
         }
       }
@@ -108,6 +112,8 @@ class YewTuBot {
       // Still mark as processed to avoid retry loops
       await this.stateManager.markPostAsProcessed(postId);
     }
+    
+    return result;
   }
 
   generateComment(youtubeLinks) {
