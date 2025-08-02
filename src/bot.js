@@ -34,7 +34,18 @@ class YewTuBot {
 
     try {
       this.logger.info('🔍 Fetching recent posts from Stacker News...');
-      const recentPosts = await this.stackerClient.getRecentPosts();
+      
+      let recentPosts;
+      try {
+        recentPosts = await this.stackerClient.getRecentPosts();
+      } catch (apiError) {
+        this.logger.error('❌ Stacker News API failed:', apiError.message);
+        this.logger.info('🔄 Trying alternative approach...');
+        
+        // Try with simpler query as fallback
+        recentPosts = await this.stackerClient.getRecentPostsSimple();
+      }
+      
       this.logger.info(`📊 Found ${recentPosts.length} recent posts`);
 
       let processedCount = 0;
@@ -59,6 +70,11 @@ class YewTuBot {
 
     } catch (error) {
       this.logger.error('❌ Bot run failed:', error);
+      this.logger.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
       process.exit(1);
     }
   }
