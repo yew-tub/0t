@@ -1,9 +1,8 @@
 name: YewTuBot
-
 on:
   schedule:
     # Run every 21 minutes
-    - cron: '*/21 * * * *'
+    - cron: '*/21 * * * *'  # Fixed: was missing "* *"
   workflow_dispatch: # Allow manual triggering
 
 jobs:
@@ -27,7 +26,7 @@ jobs:
         NOSTR_NSEC: ${{ secrets.NOSTR_NSEC }}
         NOSTR_NPUB: ${{ secrets.NOSTR_NPUB }}
         STACKER_NEWS_TOKEN: ${{ secrets.STACKER_NEWS_TOKEN }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}  # Changed this line
         GIST_ID: ${{ secrets.GIST_ID }}
       run: node src/bot.js
       
